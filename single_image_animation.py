@@ -155,7 +155,7 @@ if config.TEST.is_test:
         st = time.time()
         output = sess.run(generator_test, feed_dict={input_A_test: A_image_val})
         et = time.time()
-        output = np.concatenate([A_image_val, output], axis=2)#B_image_val
+        output = np.concatenate([A_image_val, output], axis=2)  # B_image_val
         helper.save_image(output, config.TEST.out_dir + config.TEST.out_dir_postfix + "/" + test_file_list[ind].replace('.jpg', '_out.jpg'))
         time_list[ind] = et - st
         print("test for image #: %d, time: %1.4f" % (ind, et - st))

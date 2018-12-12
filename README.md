@@ -1,77 +1,44 @@
-# The Contextual Loss [[project page]](http://cgm.technion.ac.il/Computer-Graphics-Multimedia/Software/Contextual/)
+Retraining VGG For DDIS*
 
-This is a Tensorflow implementation of the Contextual loss function as reported in the following papers:
+Project A, by George Pisha and Eyal Naor
 
-### The Contextual Loss for Image Transformation with Non-Aligned Data, [arXiv](https://arxiv.org/abs/1803.02077)
-### Learning to Maintain Natural Image Statistics, [arXiv](https://arxiv.org/abs/1803.04626)
+Background
 
-[Roey Mechrez*](http://cgm.technion.ac.il/people/Roey/), Itamar Talmi*, Firas Shama, [Lihi Zelnik-Manor](http://lihi.eew.technion.ac.il/). [The Technion](http://cgm.technion.ac.il/)
+This code is for retraining VGG19 for template matching with the Deformable Diversity Similarity (DDIS) algorithm.
+For the DDIS GitHub page: https://github.com/roimehrez/DDIS
+The code in this page was the starting point of this project.
 
-Copyright 2018 Itamar Talmi and Roey Mechrez Licensed for noncommercial research use only.
+This code enables to retrain VGG19, as pretrained for classification on ImageNet, in order to extract feature vectors that are optimized for template matching with the DDIS algoritm.
+It contains the code needed for:
+-Preprocessing training data in the format of the Visual Object Tracking (VOT) challenges
+-Training the network
+-Producing similarity heatmaps for the test batch
 
-<div align='center'>
-  <img src='images/teaser_im.png' height="500px">
-</div>
+The Report.pdf depicts in detail the process, as well as shows examples of output.
 
-## Setup
+Use
 
-### Background
-This code is mainly the contextual loss function. The two papers have many applications, here we provide only one applications: animation from single image.
+Training and Testing Material
+-The training material can be downloaded from http://www.votchallenge.net/vot2017/dataset.html 
+-image_crop.py is used to create user determined crops from the data, used for training.
+	The file is modified to wirk on VOT2016 data, with its labels, names, etc. For other data sources, adjustments need to be made.
+	In the crop.py file are explanations on the different configuration settings, such as input/output folder, crop characteristics, etc.
+-Division of data to Training/Validation/Testing can be done with make_train_val_test_dirs.py ,with user determined ratios
 
-An example pre-trained model can be download from this [link](https://www.dropbox.com/s/37nz4hy7ai4pqxc/single_im_D32_42_1.0_DC42_1.0.zip?dl=0)
+Configuration
+The main configuration parameters are depicted and user determined in config.py.
+The main parameters that need to be adjusted to user's configuration and wanted training type:
+- config.base_dir : Base location for the project
+- config.TRAIN.A_data_dir : Relative location from base_dir of the training data directory, as created with image_crop.py
+- config.TRAIN.out_dir : Relative location from base_dir of Results folder location, in which the models and logs are saved
+- config.vgg_model_path : Location of the pretrained VGG19 network, available for download on this page.
+- config.TRAIN.is_train : True for Training, False for Testing
+- config.TRAIN.num_epochs : Number of epochs to run while training
+- config.TRAIN.save_every_nth_epoch : Determines number of saved models. Each model is ~350MB.
+- config.TRAIN.every_nth_frame : Determines number of crops trained on in each data folder
+- config.TEST.A_data_dir : Relative location from base_dir of the test data directory
+- config.CX.feat_layers : Layers from network that are extracted as the feature vector
 
-The data for this example can be download from this [link](https://www.dropbox.com/s/ggb6v6rv1a0212y/single.zip?dl=0)
-
-### Requirement
-Required python libraries: Tensorflow (>=1.0) + Scipy + Numpy + easydict
-
-Tested in Windows + Intel i7 CPU + Nvidia Titan Xp (and 1080ti) with Cuda (>=8.0) and CuDNN (>=5.0). CPU mode should also work with minor changes.
-
-
-### Quick Start (Testing)
-1. Clone this repository.
-2. Download the pretrained model from this [link](https://www.dropbox.com/s/q3wjtaxr76cdx3t/imagenet-vgg-verydeep-19.mat?dl=0)
-3. Extract the zip file under ```result``` folder. The models should be in ```based_dir/result/single_im_D32_42_1.0_DC42_1.0/```
-3. Update the ```config.base_dir``` and ```config.vgg_model_path``` in ```config.py``` and run: ``` single_image_animation.py```
-
-### Training
-1. Change ```config.TRAIN.to_train``` to ```True```
-2. Arrange the paths to the data, should have ```train``` and ```test``` folders
-2. run ``` single_image_animation.py ``` for 10 epochs. 
-
-
-## License
-
-   This software is provided under the provisions of the Lesser GNU Public License (LGPL). 
-   see: http://www.gnu.org/copyleft/lesser.html.
-
-   This software can be used only for research purposes, you should cite
-   the aforementioned papers in any resulting publication.
-
-   The Software is provided "as is", without warranty of any kind.
-
-   
-## Citation
-If you use our code for research, please cite our paper:
-```
-@article{mechrez2018contextual,
-  title={The Contextual Loss for Image Transformation with Non-Aligned Data},
-  author={Mechrez, Roey and Talmi, Itamar and Zelnik-Manor, Lihi},
-  journal={arXiv preprint arXiv:1803.02077},
-  year={2018}
-}
-@article{mechrez2018Learning,
-  title={Learning to Maintain Natural Image Statistics, [arXiv](https://arxiv.org/abs/1803.04626)},
-  author={Mechrez, Roey and Talmi, Itamar and Shama, Firas and Zelnik-Manor, Lihi},
-  journal={arXiv preprint arXiv:1803.04626},
-  year={2018}
-}
-```
-
-   
-## Code References
-
-[1] Template Matching with Deformable Diversity Similarity, https://github.com/roimehrez/DDIS
-
-[2] Photographic Image Synthesis with Cascaded Refinement Networks https://cqf.io/ImageSynthesis/
-
+Additional parameters are in the main train_vgg_for_cx.py file:
+- lr: 1e-8  : Determines the Learning Rate used for training
+- G_loss : Determines the Loss Function for training. The two main options used in this project are in the code, where one is hidden.
